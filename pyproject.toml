@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lcspec"
+authors = [{name = "Barbara Suslova", email = "suslovavd2002@mail.ru"}]
+version = "0.1.0"
+dependencies = [
+    "pyyaml",
+    "requests",
+    "pre-commit",
+    "ipykernel",
+    "seaborn",
+    "libtmux",
+    "ipywidgets",
+    "nbformat",
+    "numpy",
+    "pandas",
+    "plotly",
+    "pyarrow",
+    "tqdm",
+    "datasets"
+]
+description = "The Study of Speculative Decoding on a Long Context"
+requires-python = ">=3.11"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["lcspec"]
+
+[tool.hatch.envs.default]
+dependencies = [
+    "black",
+    "isort",
+]
+
+[tool.black]
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.prettier]
+semi = false
+singleQuote = true
+tabWidth = 2
