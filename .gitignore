@@ -2,3 +2,6 @@
 __pycache__
 .logs
 results/
+artifacts/
+tokenized_datasets/
+storage/

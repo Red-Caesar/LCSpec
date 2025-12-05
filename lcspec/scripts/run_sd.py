@@ -2,35 +2,35 @@ import argparse
 import contextlib
 import gc
 import json
-import os
 import time
 import traceback
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import ray
 import torch
 from datasets import load_dataset
 from tqdm import tqdm
+from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 from vllm.distributed.parallel_state import (
     destroy_distributed_environment,
     destroy_model_parallel,
 )
+from vllm.v1.metrics.reader import Metric
 
 from lcspec.scripts.utils import load_config, setup_logger
-from vllm.v1.metrics.reader import Metric
-from transformers import AutoTokenizer
-
 
 logger = setup_logger(log_name="sd_experiments")
+BATCH_SIZE = 32
 
 
 @dataclass
 class SDMetrics:
     main_model: str
     speculative_model: str | None
+    method: str | None
     dataset_type: str
     num_prompts: int
     time_taken: float
@@ -48,9 +48,7 @@ class SDMetrics:
             json.dump(self.to_dict(), f, indent=2)
 
 
-def get_spec_acceptance_metrics(
-    metrics: list[Metric], k: int
-    ) -> Dict[str, Any]:
+def get_spec_acceptance_metrics(metrics: list[Metric], k: int) -> Dict[str, Any]:
     num_drafts = 0
     num_accepted = 0
     acceptance_counts = [0] * k
@@ -62,9 +60,7 @@ def get_spec_acceptance_metrics(
         elif metric.name == "vllm:spec_decode_num_accepted_tokens_per_pos":
             for pos in range(len(metric.values)):
                 acceptance_counts[pos] += metric.values[pos]
-    acceptance_rate_per_pos = [
-        count / num_drafts for count in acceptance_counts
-    ]
+    acceptance_rate_per_pos = [count / num_drafts for count in acceptance_counts]
     mean_acceptance_length = 1 + (num_accepted / num_drafts)
     return {
         "num_drafts": num_drafts,
@@ -79,13 +75,14 @@ def prepare_prompts(
     num_prompts: int,
     input_tokens: int | None = None,
     tokenizer: AutoTokenizer | None = None,
-    ) -> List[int]:
-
+) -> List[str]:
     if dataset_type == "code":
         dataset = load_dataset("google-research-datasets/mbpp", "full")
         prompts = dataset["test"]["text"]
     elif dataset_type == "summary":
-        dataset = load_dataset("ChicagoHAI/CaseSumm", split="train", trust_remote_code=True)
+        dataset = load_dataset(
+            "ChicagoHAI/CaseSumm", split="train", trust_remote_code=True
+        )
         system_prompt = "## TASK: Make a summary of the following text:\n\n ## TEXT: "
         prompts = [system_prompt + doc for doc in dataset["opinion"]]
     elif dataset_type == "chat":
@@ -100,9 +97,12 @@ def prepare_prompts(
         tokens_list = [tokenizer.encode(prompt) for prompt in prompts]
         std = 100
         min_prompt_tokens = max(1, input_tokens - std)
-        limited_tokens = [tokens[:input_tokens] for tokens in tokens_list if len(tokens) > min_prompt_tokens]
+        limited_tokens = [
+            tokens[:input_tokens]
+            for tokens in tokens_list
+            if len(tokens) > min_prompt_tokens
+        ]
         prompts = tokenizer.batch_decode(limited_tokens)
-
 
     if num_prompts == -1:
         return prompts
@@ -121,6 +121,19 @@ def cleanup_vllm(llm: LLM):
     logger.info("Successfully delete the llm pipeline and free the GPU memory.")
 
 
+def create_batch(prompts: List[str]) -> List[List[str]]:
+    messages = []
+    batch_array = []
+    for i, prompt in enumerate(prompts):
+        messages.append([{"role": "user", "content": prompt}])
+        if (i + 1) % BATCH_SIZE == 0:
+            batch_array.append(messages)
+            messages = []
+
+    if messages is not None:
+        batch_array.append(messages)
+    return batch_array
+
 
 def run_offline_vllm(
     server_args: Dict,
@@ -136,24 +149,15 @@ def run_offline_vllm(
     sampling_params = SamplingParams(temperature=0, max_tokens=output_tokens)
     tokenizer = AutoTokenizer.from_pretrained(server_args.get("model"))
     prompts = prepare_prompts(dataset_type, num_prompts, input_tokens, tokenizer)
+
     # messages = [[{"role": "user", "content": prompt}] for prompt in prompts]
-    batch_size = 32
-    batch_array = []
-    messages = []
-    for i, prompt in enumerate(prompts):
-        messages.append([{"role": "user", "content": prompt}])
-        if (i + 1) % batch_size == 0:
-            batch_array.append(messages)
-            messages = []
-
-    if messages is not None:
-        batch_array.append(messages)
-
+    batch_array = create_batch(prompts)
     start = time.time()
-    for batch in batch_array:
-        output = llm.chat(batch, sampling_params, use_tqdm=False)
+    for batch in tqdm(batch_array, desc="Generating outputs"):
+        llm.chat(batch, sampling_params, use_tqdm=False)
+
     # for message in tqdm(messages, desc="Generating outputs"):
-    #     output = llm.chat(message, sampling_params)
+    #     output = llm.chat(message, sampling_params, use_tqdm=False)
     #     outputs.append(output[0])
     # for prompt in tqdm(prompts, desc="Generating outputs"):
     #     output = llm.generate(prompt, sampling_params, use_tqdm=False)
@@ -177,7 +181,8 @@ def run_offline_vllm(
     timestamp = time.strftime("%Y-%m-%d_%H:%M:%S")
     metrics = SDMetrics(
         main_model=server_args["model"],
-        speculative_model=spec_config.get("model", "MTP") if spec_config else None,
+        speculative_model=spec_config.get("model", "") if spec_config else None,
+        method=spec_config.get("method", "") if spec_config else None,
         dataset_type=dataset_type,
         num_prompts=len(prompts),
         time_taken=time_taken,
@@ -193,6 +198,7 @@ def run_offline_vllm(
     logger.info(f"Results saved to {output_file}")
     cleanup_vllm(llm)
     return metrics
+
 
 def prepare_input_tokens(input_tokens_str: str | None) -> List[int]:
     if input_tokens_str is None:
@@ -242,13 +248,10 @@ def main():
         "--input_tokens",
         type=str,
         default=None,
-        help="Number of tokens to use for input. It could be a range: <min:max:step>"
+        help="Number of tokens to use for input. It could be a range: <min:max:step>",
     )
     parser.add_argument(
-        "--output_tokens",
-        type=int,
-        default=256,
-        help="Number of tokens for output"
+        "--output_tokens", type=int, default=256, help="Number of tokens for output"
     )
 
     args = parser.parse_args()
@@ -282,7 +285,9 @@ def main():
             for setup in tqdm(config["few_setups"]):
                 main_model = setup["server_args"]["model"]
                 speculative_model = (
-                    setup["server_args"].get("speculative_config", {}).get("model", "None")
+                    setup["server_args"]
+                    .get("speculative_config", {})
+                    .get("model", "None")
                 )
                 try:
                     run_offline_vllm(
