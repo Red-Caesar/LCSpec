@@ -1,0 +1,107 @@
+setups: [
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "input-tokens-distribution": "\"const(1024)\"",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "single_model",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "/home/models/meta-llama/Llama-3.1-8B-Instruct",
+        "no_enable_prefix_caching": "",
+      },
+      "env": {}
+    }
+  },
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "input-tokens-distribution": "\"const(1024)\"",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "sd",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "/home/models/meta-llama/Llama-3.1-8B-Instruct",
+        "no_enable_prefix_caching": "",
+        "speculative_config": {
+          "model": "/home/models/yuhuili/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 1,
+        }
+      },
+      "env": {}
+    }
+  },
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "input-tokens-distribution": "\"const(1024)\"",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "sd",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "/home/models/meta-llama/Llama-3.1-8B-Instruct",
+        "no_enable_prefix_caching": "",
+        "speculative_config": {
+          "model": "/home/models/yuhuili/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 2,
+        }
+      },
+      "env": {}
+    }
+  },
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "input-tokens-distribution": "\"const(1024)\"",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "sd",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "/home/models/meta-llama/Llama-3.1-8B-Instruct",
+        "no_enable_prefix_caching": "",
+        "speculative_config": {
+          "model": "/home/models/yuhuili/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 3,
+        }
+      },
+      "env": {}
+    }
+  },
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "input-tokens-distribution": "\"const(1024)\"",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "sd",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "/home/models/meta-llama/Llama-3.1-8B-Instruct",
+        "no_enable_prefix_caching": "",
+        "speculative_config": {
+          "model": "/home/models/yuhuili/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 4,
+        }
+      },
+      "env": {}
+    }
+  }
+]

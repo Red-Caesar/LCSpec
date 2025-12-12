@@ -20,10 +20,12 @@ dependencies = [
     "plotly",
     "pyarrow",
     "tqdm",
-    "datasets"
+    "datasets",
+    "locust",
+    "nbformat>=4.2.0"
 ]
 description = "The Study of Speculative Decoding on a Long Context"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 [tool.hatch.metadata]
 allow-direct-references = true
