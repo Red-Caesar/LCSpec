@@ -1,3 +1,9 @@
 [submodule "deps/vllm"]
 	path = deps/vllm
-	url = https://github.com/vllm-project/vllm.git
+	url = git@github.com:Red-Caesar/vllm.git
+	branch = bs/lcspec
+
+[submodule "deps/speculators"]
+	path = deps/speculators
+	url = git@github.com:Red-Caesar/speculators.git
+	branch = bs/lcspec

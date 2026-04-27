@@ -1,7 +1,13 @@
 .venv
+.env
+
 __pycache__
 .logs
+
 results/
-artifacts/
-tokenized_datasets/
 storage/
+output/
+tokenized_datasets/
+artifacts/
+
+*.egg-info

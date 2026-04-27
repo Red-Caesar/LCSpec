@@ -1,20 +1,19 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "lcspec"
-authors = [{name = "Barbara Suslova", email = "suslovavd2002@mail.ru"}]
 version = "0.1.0"
+requires-python = ">=3.12"
 dependencies = [
     "pyyaml",
     "requests",
-    "pre-commit",
     "ipykernel",
     "seaborn",
     "libtmux",
     "ipywidgets",
-    "nbformat",
+    "nbformat>=4.2.0",
     "numpy",
     "pandas",
     "plotly",
@@ -22,25 +21,24 @@ dependencies = [
     "tqdm",
     "datasets",
     "locust",
-    "nbformat>=4.2.0"
+    "scipy",
+    "psycopg2-binary",
+    "python-dotenv",
+    "matplotlib",
+    "transformers",
+    "ray",
+    "torch",
+    "tensorboard",
 ]
-description = "The Study of Speculative Decoding on a Long Context"
-requires-python = ">=3.12"
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[project.optional-dependencies]
+dev = ["pre-commit", "black", "isort", "ruff"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["lcspec"]
-
-[tool.hatch.envs.default]
-dependencies = [
-    "black",
-    "isort",
-]
+[tool.setuptools.packages.find]
+include = ["perfomance*"]
 
 [tool.black]
-target-version = ["py38"]
+target-version = ["py312"]
 
 [tool.isort]
 profile = "black"
@@ -50,3 +48,9 @@ multi_line_output = 3
 semi = false
 singleQuote = true
 tabWidth = 2
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

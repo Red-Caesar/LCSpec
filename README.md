@@ -1,5 +1,9 @@
 # The Study of Speculative Decoding on a Long Context
 
+## Analysis
+
+Analysis can be found at `analysis/results.ipynb`
+
 ## Setup
 
 1. **Clone and Update Submodules**
@@ -11,65 +15,54 @@ git submodule update --init --recursive
 
 2. **Create Virtual Environment** (using uv)
 ```bash
-uv venv --python 3.12 --python-preference only-managed
+make install
 source .venv/bin/activate
-uv pip install -e .
 ```
 
-3. **Install vllm**
-```
-cd deps/vllm
-VLLM_USE_PRECOMPILED=1 uv pip install --editable .
-cd ../..
-```
+## Collecting Data
 
-## Usage
+All experiment scripts live in the `experiments/` folder. Run them from the project root with the virtual environment active.
 
-### Speculative Decoding Experiments
-Configure model setups in `configs/sd_setups.yaml`, then run:
+### Speculative Decoding (SD) tests
+
+Measures acceptance rates for SD setups across a range of input token lengths.
 ```bash
-python scripts/run_sd.py \
-  --config configs/sd_setups.yaml \
-  --dataset chat \
-  --num_prompts 500 \
-  --setup_type few_setups \
-  --output_dir results/sd_experiments \
-  --input_tokens "4000"
+bash experiments/run_sd.sh
 ```
+Results are written to `results/sd_experiments/`.
 
-To run with a specific context length in some range, use the `--input-tokens "min:max:step"`:
+### Load tests
 
-
-### Experiments with different VUS
-
-Configure target and draft model setups in `configs/load_test.yaml`, then run:
+Sends concurrent requests to a running vLLM server and records latency under load.
 ```bash
-python scripts/run_load_test.py --config configs/load_test.yaml
+bash experiments/run_load_test.sh
 ```
+Artifacts land in `perfomance/scripts/load_test/artifacts/`.
 
-To run with a specific context length, use the `--input-tokens "min:max:step"`:
+### Decode statistics
+
+Plot histograms showing how many decodes are made per request..
+
 ```bash
-python scripts/run_load_test.py --config configs/load_test.yaml --input-tokens "2000:4100:1000"
+bash experiments/run_decode_statistics.sh
 ```
+Results are written to `results/decode_statistics/`.
 
-### Data Analysis
 
-Results are stored in the `results` directory. To analyze metrics using the database:
+## Loading Results into the Database
 
-1. Import Speculative Decoding metrics:
+After collecting results, load them into the database with `experiments/load_db.sh`.
+
 ```bash
-python database/run.py \
-  --etl_class sd_metrics \
-  --data_dir results/sd_experiments/ \
-  --db_name storage/database.db
+bash experiments/load_db.sh all
 ```
 
-2. Import load test metrics:
-```bash
-python database/run.py \
-  --etl_class load_test_metrics \
-  --data_dir scripts/load_test/artifacts/ \
-  --db_name storage/database.db
-```
+### Local SQLite
+By default the script writes to `storage/lcspec.db`. No extra configuration needed.
 
-3. To view the analysis results, go to `notebook.ipynb`.
+### Cloud DB (Supabase)
+To push results to the shared Supabase PostgreSQL instance, set `SUPABASE_DB_URL` in the `.env` file at the project root:
+
+```
+SUPABASE_DB_URL=postgresql://<user>:<password>@<host>:<port>/postgres
+```

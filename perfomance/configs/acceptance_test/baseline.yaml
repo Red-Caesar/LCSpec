@@ -1,0 +1,12 @@
+single_setup:
+  server_args:
+    {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "enable_prefix_caching": False,
+      "disable_log_stats": False,
+      "speculative_config": {
+        "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+        "method": "eagle3",
+        "num_speculative_tokens": 3,
+      }
+    }

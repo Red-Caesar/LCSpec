@@ -1,0 +1,42 @@
+few_setups: [
+  {"server_args": {
+    "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+    "enable_prefix_caching": False,
+    "disable_log_stats": False,
+    "speculative_config": {
+      "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+      "method": "eagle3",
+      "num_speculative_tokens": 3,
+    }
+  }},
+  {"server_args": {
+    "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+    "enable_prefix_caching": False,
+    "disable_log_stats": False,
+    "speculative_config": {
+      "model": "RedCaesar/partial_08_4",
+      "method": "eagle3_lc",
+      "num_speculative_tokens": 3,
+    }
+  }},
+  {"server_args": {
+    "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+    "enable_prefix_caching": False,
+    "disable_log_stats": False,
+    "speculative_config": {
+      "model": "RedCaesar/dynamic_08_4",
+      "method": "eagle3_lc",
+      "num_speculative_tokens": 3,
+    }
+  }},
+  {"server_args": {
+    "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+    "enable_prefix_caching": False,
+    "disable_log_stats": False,
+    "speculative_config": {
+      "model": "RedCaesar/baseline_08_ch4",
+      "method": "eagle3_lc",
+      "num_speculative_tokens": 3,
+    }
+  }},
+]

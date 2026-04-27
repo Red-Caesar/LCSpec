@@ -1,0 +1,77 @@
+setups: [
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "sd_tree_chain",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+        "no-enable-prefix-caching": "",
+        "speculative_config": {
+          "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 3,
+          "speculative_token_tree": "[(0,), (0, 0), (0, 0, 0)]",
+        },
+        attention_config: {
+          "backend": "TREE_ATTN",
+        }
+      },
+      "env": {"VLLM_DISABLE_COMPILE_CACHE": "1"}
+    }
+  },
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "sd_tree_parallel",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+        "no-enable-prefix-caching": "",
+        "speculative_config": {
+          "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 3,
+          "speculative_token_tree": "[(0,), (1,), (2,)]",
+        },
+        attention_config: {
+          "backend": "TREE_ATTN",
+        }
+      },
+      "env": {"VLLM_DISABLE_COMPILE_CACHE": "1"}
+    }
+  },
+  {
+    "load_test": {
+      "users": "1",
+      "run-time": "60s",
+      "dataset-type": "summary",
+      "output-tokens-distribution": "\"const(250)\"",
+      "run-id": "sd_tree_full",
+    },
+    "vllm": {
+      "server_args": {
+        "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+        "no-enable-prefix-caching": "",
+        "speculative_config": {
+          "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 3,
+          "speculative_token_tree": "[(0,), (1,), (0, 0), (0, 1), (1, 0), (1, 1)]",
+        },
+        attention_config: {
+          "backend": "TREE_ATTN",
+        }
+      },
+      "env": {"VLLM_DISABLE_COMPILE_CACHE": "1"}
+    }
+  }
+]

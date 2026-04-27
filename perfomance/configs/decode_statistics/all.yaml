@@ -1,0 +1,115 @@
+setups: [
+  { 
+    "run_id": "open_model",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+        "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+        "method": "eagle3",
+        "num_speculative_tokens": 3,
+      },
+      "port": "8003",
+    }
+  },
+  { 
+    "run_id": "partial",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+        "model": "RedCaesar/partial_08_4",
+        "method": "eagle3_lc",
+        "num_speculative_tokens": 3,
+      }
+    }
+  },
+  {
+    "run_id": "dynamic_yarn",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+        "model": "RedCaesar/dynamic_08_4",
+        "method": "eagle3_lc",
+        "num_speculative_tokens": 3,
+      }
+    }
+  },
+  {
+    "run_id": "baseline",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+        "model": "RedCaesar/baseline_08_ch4",
+        "method": "eagle3_lc",
+        "num_speculative_tokens": 3,
+      }
+    }
+  },
+  {
+    "run_id": "fp8_flashinference",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+        "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+        "method": "eagle3",
+        "num_speculative_tokens": 3,
+      },
+      kv_cache_dtype: "fp8",
+      attention_config: {
+        "backend": "FLASHINFER",
+      }
+    }
+  },
+  {
+    "run_id": "fp8_triton",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+        "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+        "method": "eagle3",
+        "num_speculative_tokens": 3,
+      },
+      kv_cache_dtype: "fp8",
+      attention_config: {
+        "backend": "TRITON_ATTN",
+      }
+    }
+  },
+  {
+    "run_id": "tree_parallel",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+          "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+          "method": "eagle3",
+          "num_speculative_tokens": 3,
+          "speculative_token_tree": "[(0,), (1,), (2,)]",
+      },
+      attention_config: {
+        "backend": "TREE_ATTN",
+      }
+    }
+  },
+  {
+    "run_id": "tree_full",
+    "server_args": {
+      "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+      "no-enable-prefix-caching": "",
+      "speculative_config": {
+        "model": "RedCaesar/EAGLE3-LLaMA3.1-Instruct-8B",
+        "method": "eagle3",
+        "num_speculative_tokens": 3,
+        "speculative_token_tree": "[(0,), (1,), (0, 0), (0, 1), (1, 0), (1, 1)]",
+      },
+      attention_config: {
+        "backend": "TREE_ATTN",
+      }
+    }
+  },
+]
