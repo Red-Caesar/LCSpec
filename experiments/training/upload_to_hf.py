@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from LCSpec.experiments.modeling.base import (
+from base import (
     BaselineConfig,
     DynamicYarnConfig,
     Llama3RopeConfig,
