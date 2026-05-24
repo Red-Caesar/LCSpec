@@ -5,8 +5,31 @@ single_setup:
       "enable_prefix_caching": False,
       "disable_log_stats": False,
       "speculative_config": {
-        "model": "/workspace/workflow/LCSpec/output/finetune_yarn/checkpoints/19",
+        "model": "/workspace/workflow/LCSpec/output/finetune_base/checkpoints/19",
         "method": "eagle3",
         "num_speculative_tokens": 3,
       }
     }
+
+few_setups: [
+  {"server_args": {
+    "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+    "enable_prefix_caching": False,
+    "disable_log_stats": False,
+    "speculative_config": {
+      "model": "RedCaesar/finetune_yarn_23_ch19",
+      "method": "eagle3",
+      "num_speculative_tokens": 3,
+    }
+  }},
+  {"server_args": {
+    "model": "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8",
+    "enable_prefix_caching": False,
+    "disable_log_stats": False,
+    "speculative_config": {
+      "model": "RedCaesar/finetune_baseline_23_ch19",
+      "method": "eagle3",
+      "num_speculative_tokens": 3,
+    }
+  }}
+]

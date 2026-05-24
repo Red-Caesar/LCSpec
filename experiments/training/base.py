@@ -54,30 +54,31 @@ class TrainingMethod:
                 gpu_memory_utilization=GPU_MEMORY_UTILIZATION,
                 num_preprocessing_workers=NUM_PREPROCESSING_WORKERS,
             ),
-            # DataGenArgs(
-            #     train_data_path="longalpaca",
-            #     dataset_name="longalpaca",
-            #     seq_length=LONGALPACA_SEQ_LEN,
-            #     turn_dropout=False,
-            #     batch_size=LONGALPACA_BATCH_SIZE,
-            #     max_samples=longalpaca_samples,
-            #     seed=seed,
-            #     gpu_memory_utilization=GPU_MEMORY_UTILIZATION,
-            #     num_preprocessing_workers=NUM_PREPROCESSING_WORKERS,
-            # ),
+            DataGenArgs(
+                train_data_path="longalpaca",
+                dataset_name="longalpaca",
+                seq_length=LONGALPACA_SEQ_LEN,
+                turn_dropout=False,
+                batch_size=LONGALPACA_BATCH_SIZE,
+                max_samples=longalpaca_samples,
+                seed=seed,
+                gpu_memory_utilization=GPU_MEMORY_UTILIZATION,
+                num_preprocessing_workers=NUM_PREPROCESSING_WORKERS,
+            ),
         ]
 
     def build_train_args(self, epochs: int) -> TrainArgs:
         kwargs: dict = dict(
             run_name=self.run_name,
             logger="tensorboard",
-            lr=3e-5,
+            lr=2e-5,
             total_seq_len=self._train_seq_len,
             epochs=epochs,
             num_layers=1,
             ttt_steps=3,
             use_off_policy_tokens=True,
             scheduler_warmup_steps=200,
+            scheduler_type="none",
         )
         for attr, key in (
             ("_speculator_type", "speculator_type"),
@@ -104,7 +105,7 @@ class DynamicYarnConfig(TrainingMethod):
     run_name = "dynamic_yarn_llama31_8b_fp8"
     _speculator_type = "eagle3"
     _rope_scaling = json.dumps(
-        {"rope_type": "yarn", "factor": 64.0, "original_max_position_embeddings": 2048}
+        {"rope_type": "yarn", "factor": 16.0, "original_max_position_embeddings": 2048}
     )
 
 
