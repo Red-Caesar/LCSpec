@@ -25,15 +25,21 @@ DRAFT_VOCAB_SIZE = 32000
 
 NUM_WAVES = 10
 EPOCHS_PER_WAVE = 1
-# 6000 * 1518 = 9108000 tokens
+# median 1518 tokens
 SHAREGPT_SAMPLES_PER_WAVE = 3000
-# 4000 * 1108 = 4432000 tokens
+# median 1108 tokens
 ULTRACHAT_SAMPLES_PER_WAVE = 4000
-# 500 * 7888 = 3944000 tokens
+# median 7888 tokens
 LONGALPACA_SAMPLES_PER_WAVE = 100
+# median 12690 tokens
+LONGALIGN_SAMPLES_PER_WAVE = 10
 
-# short: 13.540.000, long: 3.944.000
-
+dataset_samples: dict[str, int] = {
+    "sharegpt": SHAREGPT_SAMPLES_PER_WAVE,
+    "ultrachat": ULTRACHAT_SAMPLES_PER_WAVE,
+    "longalpaca": LONGALPACA_SAMPLES_PER_WAVE,
+    "longalign": LONGALIGN_SAMPLES_PER_WAVE,
+}
 
 METHODS: dict[str, TrainingMethod] = {
     "baseline": BaselineConfig(),
@@ -54,12 +60,9 @@ def run_waves(method: TrainingMethod) -> None:
     for wave in range(NUM_WAVES):
         data_gen_args = method.build_data_gen_args(
             seed=wave,
-            sharegpt_samples=SHAREGPT_SAMPLES_PER_WAVE,
-            ultrachat_samples=ULTRACHAT_SAMPLES_PER_WAVE,
-            longalpaca_samples=LONGALPACA_SAMPLES_PER_WAVE,
+            dataset_samples=dataset_samples,
         )
         train_args = method.build_train_args(epochs=(wave + 1) * EPOCHS_PER_WAVE)
-
         run_e2e(
             verifier_name_or_path=VERIFIER,
             output_path=str(output_path),
@@ -67,7 +70,6 @@ def run_waves(method: TrainingMethod) -> None:
             vocab_mapping_args=vocab_mapping_args if wave == 0 else None,
             train_args=train_args,
         )
-
         if gen_dir.exists() and wave < NUM_WAVES - 1:
             shutil.rmtree(gen_dir)
 
