@@ -2,9 +2,10 @@
 
 CONFIGS=(
     "perfomance/configs/load_test/baseline.yaml"
-    "perfomance/configs/load_test/trained_spec.yaml"
-    "perfomance/configs/load_test/tree_attention.yaml"
-    "perfomance/configs/load_test/compressed_kv_cache.yaml"
+    "perfomance/configs/load_test/finetuned_official.yaml"
+    # "perfomance/configs/load_test/tree_attention.yaml"
+    # "perfomance/configs/load_test/compressed_kv_cache.yaml"
+    # "perfomance/configs/load_test/trained_spec.yaml"
     # "perfomance/configs/load_test/open_model_diff_nstokens.yaml"
 )
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"

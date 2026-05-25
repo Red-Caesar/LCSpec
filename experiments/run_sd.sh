@@ -1,10 +1,11 @@
 #!/bin/bash
 
 CONFIGS=(
-    # "perfomance/configs/acceptance_test/baseline.yaml"
-    "perfomance/configs/acceptance_test/trained_spec.yaml"
+    "perfomance/configs/acceptance_test/baseline.yaml"
+    "perfomance/configs/acceptance_test/finetuned_official.yaml"
     # "perfomance/configs/acceptance_test/partial.yaml"
     # "perfomance/configs/acceptance_test/dynamic_yarn.yaml"
+    # "perfomance/configs/acceptance_test/trained_spec.yaml"
 )
 
 DATASET="summary"           # code | summary | chat
@@ -28,7 +29,7 @@ for CONFIG in "${CONFIGS[@]}"; do
         ${SMALL_INPUT_TOKENS:+--input-tokens "$SMALL_INPUT_TOKENS"}
 done
 
-LARGE_INPUT_TOKENS="4000:8001:4000"
+LARGE_INPUT_TOKENS="3000:8001:1000"
 for CONFIG in "${CONFIGS[@]}"; do
     echo "Running SD: $CONFIG"
     python -m perfomance.scripts.run_sd \

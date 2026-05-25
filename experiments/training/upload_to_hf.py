@@ -1,10 +1,11 @@
 import argparse
 from pathlib import Path
 
-from LCSpec.experiments.modeling.base import (
+from base import (
     BaselineConfig,
     DynamicYarnConfig,
-    Llama3RopeConfig,
+    FinetunedBaseConfig,
+    FinetunedYarnConfig,
     PartialRopeConfig,
     TrainingMethod,
 )
@@ -14,9 +15,10 @@ OUTPUT_BASE = Path("./output")
 
 METHODS: dict[str, TrainingMethod] = {
     "baseline": BaselineConfig(),
-    "dynamic_yarn": DynamicYarnConfig(),
-    "llama3rope": Llama3RopeConfig(),
-    "partial_rope": PartialRopeConfig(),
+    "yarn": DynamicYarnConfig(),
+    "partial": PartialRopeConfig(),
+    "finetuned_base": FinetunedBaseConfig(),
+    "finetuned_yarn": FinetunedYarnConfig(),
 }
 
 _SKIP_PATTERNS = ["optimizer_state_dict.pt", "scheduler_state_dict.pt"]
@@ -29,7 +31,12 @@ def latest_checkpoint(checkpoints_dir: Path) -> Path:
     return max(candidates, key=lambda p: int(p.name))
 
 
-def upload(method: TrainingMethod, repo_id: str, checkpoint: int | None) -> None:
+def upload(
+    method: TrainingMethod,
+    repo_id: str,
+    checkpoint: int | None,
+    save_state_dicts: bool,
+) -> None:
     checkpoints_dir = OUTPUT_BASE / method.output_subdir / "checkpoints"
     if not checkpoints_dir.exists():
         raise FileNotFoundError(f"Checkpoints directory not found: {checkpoints_dir}")
@@ -50,7 +57,7 @@ def upload(method: TrainingMethod, repo_id: str, checkpoint: int | None) -> None
         folder_path=str(checkpoint_dir),
         repo_id=repo_id,
         repo_type="model",
-        ignore_patterns=_SKIP_PATTERNS,
+        ignore_patterns=_SKIP_PATTERNS if save_state_dicts else [],
     )
     print("Done.")
 
@@ -76,5 +83,10 @@ if __name__ == "__main__":
         default=None,
         help="Checkpoint number to upload. Defaults to the latest.",
     )
+    parser.add_argument(
+        "--save_state_dicts",
+        type=bool,
+        action="store_true",
+    )
     args = parser.parse_args()
-    upload(METHODS[args.method], args.repo, args.checkpoint)
+    upload(METHODS[args.method], args.repo, args.checkpoint, args.save_state_dicts)
